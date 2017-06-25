@@ -80,8 +80,8 @@
 #define GetActorColor Actor::GetColor
 
 #define Actor->OnSpawn() public OnActorSpawn(Actor:Id)
-#define Actor->OnSkinChange(oldskin, newskin) public OnActorSkinChange(Actor:Id, oldskin, newskin)
-#define Actor->OnNameChange(oldnick[], newnick[]) public OnActorNameChange(Actor:Id, oldnick[], newnick[])
+#define Actor->OnSkinChange(oldskin,newskin) public OnActorSkinChange(Actor:Id, oldskin, newskin)
+#define Actor->OnNameChange(oldnick[],newnick[]) public OnActorNameChange(Actor:Id, oldnick[], newnick[])
 
 // Variables
 new Actor:MAX_ACTORS = 100;
