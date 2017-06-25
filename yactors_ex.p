@@ -16,11 +16,10 @@
  /*AUTHOR ***********************
   @Yassine - SA-MP Scripter
  ********************************/
- 
+
 #include <a_samp>
 #include <yactors>
 #include <zcmd>
-#include <sscanf2>
 
 static Actor:Testing;
 
@@ -38,19 +37,19 @@ public OnFilterScriptExit()
 	return 1;
 }
 
-Actor->OnSpawn()
+public OnActorSpawn(Actor:Id)
 {
 	printf("[Debug::Actor]: Actor Id: %d has been spawned.", Id);
 	return 1;
 }
 
-Actor->OnSkinChange(oldskin, newskin)
+public OnActorSkinChange(Actor:Id, oldskin, newskin)
 {
 	printf("[Debug::Actor]: Actor Id: %d skin has been changed from %d to %d.", Id, oldskin, newskin);
 	return 1;
 }
 
-Actor->OnNameChange(oldnick[], newnick[])
+public OnActorNameChange(Actor:Id, oldnick[], newnick[])
 {
 	printf("[Debug::Actor]: Actor Id: %d name has been changed from %s to %s.", Id, oldnick, newnick);
 	return 1;
@@ -60,7 +59,7 @@ CMD:actorsay(playerid, params[])
 {
 	new string[129], Id; // SA-MP Chat max text.
 	if(sscanf(params, "is[129]", Id, string)) return SendClientMessage(playerid, -1, "Usage: /actorsay [actorid] [text]");
-	format(string, sizeof(string), "[Actor]%s: %s", Actor::GetName(Id), string);
+	format(string, sizeof(string), "[Actor]%s: %s", GetActorName(Id), string);
 	SendClientMessageToAll(-1, string);
 	return 1;
 }
