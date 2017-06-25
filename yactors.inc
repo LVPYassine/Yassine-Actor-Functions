@@ -17,7 +17,7 @@
   @Yassine - SA-MP Scripter
  ********************************/
 
-#include <a_actors>
+#include <a_actor>
 
 /*
 	(Pawn Syntax) 
