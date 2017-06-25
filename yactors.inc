@@ -21,21 +21,21 @@
 
 /*
 	(Pawn Syntax) 
-	
+
 		Set Functions:
-			
+
 			native SetActorSpawnInfo(Actor:Id, skin, Float:x, Float:y, Float:z, virtualworld = -1)
 			native SetActorName(Actor:Id, name[])
 			native SetActorColor(Actor:Id, color)
 			native SetActorSkin(Actor:Id, skin)
-			
+
 		Get Functions:
-		
+
 			native GetActorName(Actor:Id)
 			native GetActorColor(Actor:Id)
-		
+
 		Global Functions:
-			
+
 			native Actor:SpawnActor(name[], Float:x, Float:y, Float:z)
 			native ToggleActorName(Actor:Id, bool:show)
 			native RemoveActor(Actor:Id)
@@ -43,69 +43,38 @@
 
 
 		Callbacks:
-			
+
 			forward OnActorSpawn(Actor:Id)
 			forward OnActorSkinChange(Actor:Id, oldskin, newskin)
 			forward OnActorNameChange(Actor:Id, oldnick[], newnick[])
-			
-	(Yassine's Syntax)
-		
-			Set Functions:
-				
-				native Actor::SetSpawnInfo(Actor:Id, skin, Float:x, Float:y, Float:z, virtualworld = -1)
-				native Actor::SetName(Actor:Id, name[])
-				native Actor::SetColor(Actor:Id, color)
-				native Actor::SetSkin(Actor:Id, skin)
-			
-			Get Functions:
-				
-				native Actor::GetName(Actor:Id)
-				native Actor::GetColor(Actor:Id)
-			
-			Callbacks:
-				
-				Actor->OnSpawn()
-				Actor->OnSkinChange(oldskin, newskin)
-				Actor->OnNameChange(oldnick[], newnick[])
+
 */
 
-// Syntax creating
-
-#define SetActorSpawnInfo Actor::SetSpawnInfo
-#define SetActorName Actor::SetName
-#define SetActorColor Actor::SetColor
-#define SetActorSkin Actor::SetSkin
-
-#define GetActorName Actor::GetName
-#define GetActorColor Actor::GetColor
-
-#define Actor->OnSpawn() public OnActorSpawn(Actor:Id)
-#define Actor->OnSkinChange(oldskin,newskin) public OnActorSkinChange(Actor:Id, oldskin, newskin)
-#define Actor->OnNameChange(oldnick[],newnick[]) public OnActorNameChange(Actor:Id, oldnick[], newnick[])
 
 // Variables
-new Actor:MAX_ACTORS = 100;
+#define Actors 100
 
 enum ENUM_ACTOR_INFO
 {
-	Id,
+	ActorId,
 	Name[25],
 	Text3D:NameText,
-	Float:x,
-	Float:z, 
-	Float:y,
+	Float:ax,
+	Float:az, 
+	Float:ay,
+    Float:aa,
 	Color = -1,
 	Skin
 }
 
-new ActorInfo[MAX_ACTORS][ENUM_ACTOR_INFO], currentactor;
+static Actor:ActorInfo[Actors][ENUM_ACTOR_INFO], currentactor;
 
 // Set Functions
 static stock SetActorSpawnInfo(Actor:Id, skin, Float:x, Float:y, Float:z, virtualworld = -1)
 {
 	if(!IsValidActor(Id)) return printf("[Debug::Actors]: Actor:Id %d doesnt not exists", Id);
 	SetActorSkin(Id, skin);
-	ActorInfo[Id][x] = x, ActorInfo[Id][y] = y, ActorInfo[Id][z] = z;
+	ActorInfo[Id][ax] = x, ActorInfo[Id][ay] = y, ActorInfo[Id][az] = z;
 	RespawnActor(Id);
 	return 1;
 }
@@ -130,7 +99,7 @@ static stock SetActorColor(Actor:Id, color)
 static stock SetActorSkin(Actor:Id, skin)
 {
 	if(!IsValidActor(Id)) return printf("[Debug::Actors]: Actor:Id %d doesnt not exists", Id);
-	SetActorSpawnInfo(Id, skin, ActorInfo[Id][x], c);
+	SetActorSpawnInfo(Id, skin, ActorInfo[Id][ax], c);
 	CallRemoteFunction("OnActorSkinChange", "ii", ActorInfo[Id][Skin], skin);
 	ActorInfo[Id][Skin] = skin;
 	return true;
@@ -153,11 +122,11 @@ static stock GetActorColor(Actor:Id)
 static stock Actor:SpawnActor(name[], Float:x, Float:y, Float:z, Float:a)
 {
 	ActorInfo[currentactor][Id] = CreateActor(0, x, y, z, a);
-	ActorInfo[Id][x] = x, ActorInfo[Id][y] = y, ActorInfo[Id][z] = z, ActorInfo[Id][Angle] = a;
+	ActorInfo[Id][ax] = x, ActorInfo[Id][ay] = y, ActorInfo[Id][az] = z, ActorInfo[Id][Angle] = a;
 	ActorInfo[currentactor][Name] = name;
 	ActorInfo[currentactor][NameText] = Create3DTextLabel(name, ActorInfo[Id][Color], x, y, z, 40.0, -1, 0);
 	currentactor++;
-	
+
 	new Actor:func = currentactor - 1;
 	CallRemoteFunction("OnActorSpawn", "i", func);
 	return ActorInfo[currentactor - 1][Id];
@@ -183,7 +152,7 @@ static stock ToggleActorName(Actor:Id, bool:show)
 static stock RemoveActor(Actor:Id)
 {
 	if(!IsValidActor(Id)) return printf("[Debug::Actors]: Actor:Id %d doesnt not exists", Id);
-	RemoveActor(ActorInfo[Id][Id]);
+	RemoveActor(ActorInfo[Id][ActorId]);
 	Delete3DTextLabel(ActorInfo[Id][NameText]);
 	return true;
 }
@@ -200,7 +169,7 @@ static stock RespawnActor(Actor:Id)
 {
 	if(!IsValidActor(Id)) return printf("[Debug::Actors]: Actor:Id %d doesnt not exists", Id);
 	RemoveActor(Id);
-	Id = SpawnActor(Id, ActorInfo[Id][x], ActorInfo[Id][y], ActorInfo[Id][z], ActorInfo[Id][Angle]);
+	Id = SpawnActor(Id, ActorInfo[Id][ax], ActorInfo[Id][ay], ActorInfo[Id][az], ActorInfo[Id][Angle]);
 	return 1;
 }
 
@@ -216,10 +185,10 @@ public OnActorUpdate()
 {
 	new Float:pX, Float:pY, Float:pZ;
 	GetActorPos(i, pX, pY, pZ);
-	if (pX != ActorInfo[Id][x] || pY != ActorInfo[Id][y] || pZ != ActorInfo[Id][z])
+	if (pX != ActorInfo[Id][ax] || pY != ActorInfo[Id][ay] || pZ != ActorInfo[Id][az])
 	{
-		CallRemoteFunction("OnActorPosChange", "ffffff", ActorInfo[Id][x], ActorInfo[Id][y], ActorInfo[Id][z], pX, pY, pZ);
-		ActorInfo[Id][x] = pX, ActorInfo[Id][y] = pY, ActorInfo[Id][z] = pZ;
+		CallRemoteFunction("OnActorPosChange", "ffffff", ActorInfo[Id][ax], ActorInfo[Id][ay], ActorInfo[Id][az], pX, pY, pZ);
+		ActorInfo[Id][ax] = pX, ActorInfo[Id][ay] = pY, ActorInfo[Id][az] = pZ;
 		UpdateActorName(Id);
 	}
 	return true;
