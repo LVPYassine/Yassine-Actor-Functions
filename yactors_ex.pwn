@@ -63,6 +63,3 @@ CMD:actorsay(playerid, params[])
 	SendClientMessageToAll(-1, string);
 	return 1;
 }
-
-
-
